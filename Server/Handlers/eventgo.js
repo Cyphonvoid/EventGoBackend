@@ -83,6 +83,7 @@ async function GetUser(req, res){
         if(user_data != undefined && user != null){res.json(user_data); return true;}
     }
 
+    //Using email and pass
     else if(req.body.id != undefined && req.body.id != null && req.body.id != ""){
         let user_data = await database.supabase_client().auth.signInWithPassword({email:req.body.email, password:req.body.password})
         if(user_data != null && user_data != undefined){res.json(user_data); return true}
