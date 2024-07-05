@@ -2,14 +2,14 @@ import { expressServer, database } from "../server_tools.js"
 
 
 /* USER ACCOUNT ENTITY  ROUTE */
-expressServer.router('router1').get('/Account/Create/AllProfiles', CreateAllProfiles)
+expressServer.router('app').get('/Account/Create/AllProfiles', CreateAllProfiles)
 export async function CreateAllProfiles(req, res){
 
     res.send("Endpoint exists but isn't implemented");
 }
 
 
-expressServer.router('router1').get('/createUser', CreateUser)
+expressServer.router('app').get('/createUser', CreateUser)
 async function CreateUser(req, res){
     let email = req.query.email
     let password = req.query.password
@@ -28,8 +28,8 @@ async function CreateUser(req, res){
 }
 
 
-expressServer.router('router1').get('/deleteUser', DeleteUser)
-expressServer.router('router1').get('/deleteUser/EmailAndPass', DeleteUser)
+expressServer.router('app').get('/deleteUser', DeleteUser)
+expressServer.router('app').get('/deleteUser/EmailAndPass', DeleteUser)
 async function DeleteUser(req, res){
     let email = req.query.email
     let password = req.query.password
@@ -49,7 +49,7 @@ async function DeleteUser(req, res){
     res.send("User already doesn't exist to delete")
 }
 
-expressServer.router('router1').get('/deleteUser/AccessToken', DeleteUserWithAccessToken)
+expressServer.router('app').get('/deleteUser/AccessToken', DeleteUserWithAccessToken)
 async function DeleteUserWithAccessToken(req, res){
     let access_token = req.query.access_token
     let user_data = await database.supabase_client().auth.getUser(access_token)
@@ -66,7 +66,7 @@ async function DeleteUserWithAccessToken(req, res){
 }
 
 
-expressServer.router('router1').get('/updateUser', UpdateUser)
+expressServer.router('app').get('/updateUser', UpdateUser)
 async function UpdateUser(req, res){
     let data = {Email:req.query.email, Password:req.query.pass, Address:req.query.address,  UserID:req.query.userid}
     let success = await database.eventgo_schema().EventGoUser(data).Update()
@@ -74,7 +74,7 @@ async function UpdateUser(req, res){
     res.send("Couldn't update user")
 }
 
-expressServer.router('router1').get('/GetUser', GetUser)
+expressServer.router('app').get('/GetUser', GetUser)
 async function GetUser(req, res){
 
     //If access_token is available
@@ -97,7 +97,7 @@ async function GetUser(req, res){
 
 
 /* BUSINESS ACCOUNT ENTITY ROUTE*/
-expressServer.router('router1').post('/createBusiness/EmailAndPass', CreateBusiness)
+expressServer.router('app').post('/createBusiness/EmailAndPass', CreateBusiness)
 async function CreateBusiness(req, res){
     //This endpoint creates ALL 3 Entities at same time. It assumes that business and regular account will be 
     //merged together. Note this contraint may not exist in future
@@ -122,7 +122,7 @@ async function CreateBusiness(req, res){
 
 }
 
-expressServer.router('router1').post('/createBusiness/LinkToAccount', LinkAndCreateBusiness)
+expressServer.router('app').post('/createBusiness/LinkToAccount', LinkAndCreateBusiness)
 async function LinkAndCreateBusiness(req, res){
     let business_body = req.body.business
     let user = req.body.user
@@ -145,7 +145,7 @@ async function LinkAndCreateBusiness(req, res){
     res.send("Business profiled created and linked")
 }   
 
-expressServer.router('router1').get('/findUser', SearchUser)
+expressServer.router('app').get('/findUser', SearchUser)
 async function SearchUser(req, res){
     let user = await database.eventgo_schema().U(req.body)
     let result = await business.Search();
@@ -154,7 +154,7 @@ async function SearchUser(req, res){
 
 
 
-expressServer.router('router1').post('/deleteBusiness', DeleteBusiness)
+expressServer.router('app').post('/deleteBusiness', DeleteBusiness)
 async function DeleteBusiness(req, res){
     let business_body = req.body.business
 
@@ -171,7 +171,7 @@ async function DeleteBusiness(req, res){
 }   
 
 
-expressServer.router('router1').post('/UpdateBusiness', UpdateBusiness)
+expressServer.router('app').post('/UpdateBusiness', UpdateBusiness)
 async function UpdateBusiness(req, res){
     let business_body = req.body.business
 
@@ -190,7 +190,7 @@ async function UpdateBusiness(req, res){
 
 
 /* TICKET ENTITY ROUTE */
-expressServer.router('router1').get('/createTicket', CreateTicket)
+expressServer.router('app').get('/createTicket', CreateTicket)
 async function CreateTicket(req, res){
     let show = await database.eventgo_schema().Show(req.body.show)
     let success = await show.Synchronize();
@@ -209,7 +209,7 @@ async function CreateTicket(req, res){
     return false;
 }
 
-expressServer.router('router1').get('/cancelTicket', CancelTicket)
+expressServer.router('app').get('/cancelTicket', CancelTicket)
 async function CancelTicket(req, res){
 
     //A show object must exists which alreaady contains the ticket
@@ -234,7 +234,7 @@ async function CancelTicket(req, res){
 }
 
 
-expressServer.router('router1').get("/buyTicket", BuyTicket)
+expressServer.router('app').get("/buyTicket", BuyTicket)
 async function BuyTicket(){
     let access_token = req.query['access_token']
     let response = await database.supabase_client().auth.signInWithPassword(req.query)
@@ -261,7 +261,7 @@ async function BuyTicket(){
     res.send("couldn't extract sesion and user")
 }
 
-expressServer.router('router1').get('/findTicket', SearchTicket)
+expressServer.router('app').get('/findTicket', SearchTicket)
 async function SearchTicket(req, res){
     let ticket = await database.eventgo_schema().Ticket(req.body)
     let result = await ticket.Search();
@@ -271,7 +271,7 @@ async function SearchTicket(req, res){
 
 
 /* SHOW ENTITY ROUTE */
-expressServer.router('router1').get('/createShow', CreateShow)
+expressServer.router('app').get('/createShow', CreateShow)
 async function CreateShow(req, res){
     //Create business object
     let business = await database.eventgo_schema().Business(req.body.business)
@@ -301,7 +301,7 @@ async function CreateShow(req, res){
 }
 
 
-expressServer.router('router1').get('/cancelShow', CancelShow)
+expressServer.router('app').get('/cancelShow', CancelShow)
 async function CancelShow(req, res){
   
     //Create show object 
@@ -318,7 +318,7 @@ async function CancelShow(req, res){
     return false;
 }
 
-expressServer.router('router1').post('/updateShow', UpdateShow)
+expressServer.router('app').post('/updateShow', UpdateShow)
 async function UpdateShow(req, res){
      //Create show object 
      let show = await database.eventgo_schema().Show(req.body.show)
@@ -335,7 +335,7 @@ async function UpdateShow(req, res){
      return false;
 }
 
-expressServer.router('router1').get('/findShow', SearchShow)
+expressServer.router('app').get('/findShow', SearchShow)
 async function SearchShow(req, res){
     let show = await database.eventgo_schema().Show(req.body)
     let result = await show.Search();

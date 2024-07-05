@@ -5,13 +5,13 @@ function CheckEmailAndPass(email, pass){
     return ((email != null && email != undefined && email != "") && (pass != null && pass != undefined && pass != ""))
 }
 
-expressServer.router('router1').get("/", Root)
+expressServer.router('app').get("/", Root)
 export function Root(req, res){
     res.send("ROOT endpoint working and reacheable")
 }
 
  /* UTILITY ROUTES */
-expressServer.router('router1').get("/login", Login)
+expressServer.router('app').get("/login", Login)
 export async function Login(req, res){    
     let response = await database.supabase_client().auth.signInWithPassword(req.query)
 
@@ -30,7 +30,7 @@ export async function Login(req, res){
 }
 
 
-expressServer.router('router1').get('/signup', SignUp)
+expressServer.router('app').get('/signup', SignUp)
 export async function SignUp(req, res){
 
     //Check if the email and password are correct
