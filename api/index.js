@@ -1,5 +1,5 @@
-//import { Access, Payment, Authenticator, EventGo} from "../Server/Handlers/handlers.js";
-import { Root, Login, SignUp } from "../Server/Handlers/handlers2.js";
+import { Access, Payment, Authenticator, EventGo} from "../Server/Handlers/handlers.js";
+//import { Root, Login, SignUp } from "../Server/Handlers/handlers2.js";
 import { expressServer } from "../Server/server_tools.js";
 
 
