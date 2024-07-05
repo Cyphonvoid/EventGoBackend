@@ -56,3 +56,25 @@ export async function SignUp(req, res){
     server_resp.set_success('SignUp Successfull')
     res.json(server_resp.get())
 }
+
+
+
+expressServer.router('app').get('/signout', SignOut)
+async function SignOut(req, res){
+    //User can also be signedout of the clientside.
+
+    //revoke the refresh token of the user. Access token still remains valid till it's expiry
+    let {data, error} = await database.supabase_client().auth.signOut(req.body.user.access_token)
+    if(error){
+        let server_response = ServerResponse("Couldn't signout the user")
+        server_response.set_not_sucess("Maybe user doesn't exist")
+        res.send(server_response.get())
+        return false;
+    }
+
+    //If the user exists then send this response
+    let server_response = ServerResponse("User signed out successfully")
+    server_response.set_success("Revoked refresh tokens")
+    res.send(server_response.get())
+    return true;
+}
