@@ -1,5 +1,5 @@
 //import 'dotenv/config'
-require('dotenv').config(); //for netlify
+//require('dotenv').config(); //for netlify
 import * as RouteHandlers from "./Handlers/handlers.js"
 import { expressServer } from "./server_tools.js";
 
