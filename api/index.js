@@ -5,4 +5,4 @@ import { expressServer } from "../Server/server_tools";
 expressServer.set_port(3000)
 expressServer.use_cors(false)
 expressServer.start()
-module.exports = expressServer.router('app')
+module.exports = expressServer.app()
