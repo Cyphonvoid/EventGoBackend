@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { SupabaseUser, EventGoUser, EventGoBusiness, CombinedUser, Transaction, Show, Ticket} from "./Schematics/schema.js"
+import { SUPA_ANON_KEY, SUPA_SERVICE_KEY, SUPA_URL } from "./Schematics/Supabase.js";
 export class DatabaseSchema{
     constructor(){
 
@@ -17,7 +18,7 @@ export class DatabaseSchema{
 export class EventGoDatabase{
 
     constructor(){
-        this.supa_database_client = createClient(process.env.SUPA_URL, process.env.SUPA_ANON_KEY)
+        this.supa_database_client = createClient(SUPA_URL, SUPA_SERVICE_KEY)
         this.schema = new DatabaseSchema();
     }
     
@@ -31,6 +32,6 @@ export class EventGoDatabase{
 
     refresh_supabase_client(){
         delete this.supa_database_client
-        this.supa_database_client = createClient(process.env.SUPA_URL, process.env.SUPA_ANON_KEY)
+        this.supa_database_client = createClient(SUPA_URL, SUPA_SERVICE_KEY)
     }
 }
