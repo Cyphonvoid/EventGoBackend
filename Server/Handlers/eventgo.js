@@ -29,7 +29,7 @@ async function CreateUser(req, res){
 
 
 expressServer.router('app').get('/deleteUser', DeleteUser)
-expressServer.router('app').get('/deleteUser/EmailAndPass', DeleteUser)
+expressServer.router('app').get('/deleteUserByEmailAndPass', DeleteUser)
 async function DeleteUser(req, res){
     let email = req.query.email
     let password = req.query.password
@@ -49,7 +49,7 @@ async function DeleteUser(req, res){
     res.send("User already doesn't exist to delete")
 }
 
-expressServer.router('app').get('/deleteUser/AccessToken', DeleteUserWithAccessToken)
+expressServer.router('app').get('/deleteUserByAccessToken', DeleteUserWithAccessToken)
 async function DeleteUserWithAccessToken(req, res){
     let access_token = req.query.access_token
     let user_data = await database.supabase_client().auth.getUser(access_token)
