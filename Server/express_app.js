@@ -24,6 +24,8 @@ export class ExpressServer{
     }
 
     router(selection){
+        if(selection === 'app'){return this._app}
+        
         let in_use = this._available_routers[selection].in_use
         if(in_use == false){
             this._available_routers[selection].in_use = true;
@@ -40,13 +42,14 @@ export class ExpressServer{
     }
 
     update_router(name, attributes){
+        /*
         let keys = Object.keys(attributes)
         let keys_len = Object.keys(attributes).length
 
         let router = this._available_routers[name]
         for (let i = 0; i < keys_len; i++){
             router[keys[i]] = attributes[keys[i]]
-        }
+        }*/
 
     }
 
