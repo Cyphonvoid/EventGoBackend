@@ -15,5 +15,7 @@ export async function Confirmation(req, res){
 }
 
 
-
-
+expressServer.router('app').get('/verifyQRcode', VerifyQRcode)
+async function VerifyQRcode(req, res){
+    
+}

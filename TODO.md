@@ -1,1 +1,41 @@
-configure netlify to work with backend
+
+# QR Code functionality
+
+
+
+generate qr token upon buying ticket of a show
+
+qr_code_token = {
+    ticket:{
+        ticket_id:uuid,
+        business_id:uuid,
+        customer_id:uuid        
+    },
+    show:{
+        show_id:uuid,
+        business_id:uuid
+    },
+    transaction:{
+        transaction_id:uuid,
+        payment_by_id:uuid,
+        payment_to:uuid
+    }
+}
+
+now we encrypt this raw token using AES or whatever using a common backend key or signature
+
+qr_encrypted_token = gfA7jhg2HNX6omH95jloG310LHCM3G4Qhj7             (Random)
+final_encoding = https://backend:port/validateQRcode?encrypted_token=gfA7jhg2HNX6omH95jloG310LHCM3G4Qhj7
+
+
+this encoding is stored into ticket entities
+
+
+then gets passed onto frontend
+
+
+frontend then sends this encryption to backend which validates it and displays whether the user has actually bought ticket or not.
+
+
+
+
