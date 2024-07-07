@@ -1,7 +1,8 @@
 import { expressServer } from "../server_tools";
 
-
+expressServer.use_cors(false);
 expressServer.router('app').get('/synchronizeSchematic', DatabaseSchematic)
+expressServer.router('app').post('/synchronizeSchematic', DatabaseSchematic)
 async function DatabaseSchematic(req, res){
     /**
      * This is a secure private admin endpoint. Updates the schematic model 

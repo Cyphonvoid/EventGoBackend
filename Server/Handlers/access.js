@@ -64,6 +64,7 @@ export async function SignUp(req, res){
 
 
 expressServer.router('app').get('/signout', SignOut)
+expressServer.router('app').post('/signout', SignOut)
 async function SignOut(req, res){
     //User can also be signedout of the clientside.
 
