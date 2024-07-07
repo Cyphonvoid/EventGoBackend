@@ -152,6 +152,14 @@ async BuyTicket(ticket_details){
     return success
 }
 
+async AddPaymentMethod(){
+
+}
+
+async RemovePaymentMethod(){
+
+}
+
 async __synchronize_with_database_row(){
     let{data, error} = await supabaseAdminClient.from('EventGoUsers').select()
     .eq('UserID', this.attributes.UserID)
@@ -163,10 +171,12 @@ async __synchronize_with_database_row(){
     return false;
 }
 
+
 async Synchronize(){
     let success = await this.__synchronize_with_database_row
     return success
 }
+
 
 async GetUserByEmailAndPass(){
     let {data, error}= await supabaseAdminClient.from('EventGoUsers').select()

@@ -4,7 +4,6 @@ import { expressServer, database } from "../server_tools.js"
 /* USER ACCOUNT ENTITY  ROUTE */
 expressServer.router('app').get('/Account/Create/AllProfiles', CreateAllProfiles)
 export async function CreateAllProfiles(req, res){
-
     res.send("Endpoint exists but isn't implemented");
 }
 
@@ -237,6 +236,13 @@ async function CancelTicket(req, res){
 
 expressServer.router('app').get("/buyTicket", BuyTicket)
 async function BuyTicket(){
+    /**
+     * In order to buy ticket the user object will generate it
+     * after the ticket has been created it will create a transaction as well.
+     * to process transaction, a webhook can be configured to listen for generated transaction.
+     * it can then either call secure endpoint on backend or self process transacction.
+     * in our case since we will use stripe API through
+     */
     let access_token = req.query['access_token']
     let response = await database.supabase_client().auth.signInWithPassword(req.query)
 
@@ -261,6 +267,8 @@ async function BuyTicket(){
     }
     res.send("couldn't extract sesion and user")
 }
+
+
 
 expressServer.router('app').get('/findTicket', SearchTicket)
 async function SearchTicket(req, res){
