@@ -1,6 +1,9 @@
 import { expressServer, database, ServerResponse} from "../server_tools.js"
 
 
+
+expressServer.use_cors(false);
+
 function CheckEmailAndPass(email, pass){
     return ((email != null && email != undefined && email != "") && (pass != null && pass != undefined && pass != ""))
 }
@@ -11,9 +14,10 @@ export function Root(req, res){
 }
 
  /* UTILITY ROUTES */
+expressServer.router('app').post('/login', Login)
 expressServer.router('app').get("/login", Login)
 export async function Login(req, res){    
-    let response = await database.supabase_client().auth.signInWithPassword(req.query)
+    let response = await database.supabase_client().auth.signInWithPassword(req.body)
 
     console.log(response)
     if(response == false){
@@ -29,12 +33,12 @@ export async function Login(req, res){
     res.json(response);
 }
 
-
+expressServer.router('app').post('/signup', SignUp)
 expressServer.router('app').get('/signup', SignUp)
 export async function SignUp(req, res){
 
     //Check if the email and password are correct
-    if(CheckEmailAndPass(req.query.email, req.query.password) == false){
+    if(CheckEmailAndPass(req.body.email, req.body.password) == false){
         res.send("Email and Password don't match backend criterion. Values either undefined or null")
         return false;
     }

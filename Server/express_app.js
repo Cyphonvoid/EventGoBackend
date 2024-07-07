@@ -72,6 +72,7 @@ export class ExpressServer{
 
         //Disable the cors policy
         this._app.use(cors());
+        this._cors = false;
         return false;
     }
 
