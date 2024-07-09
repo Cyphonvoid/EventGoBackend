@@ -5,6 +5,7 @@ import { expressServer, database, ServerResponse} from "../server_tools.js"
 expressServer.use_cors(false);
 
 function CheckEmailAndPass(email, pass){
+    console.log(email, pass)
     return ((email != null && email != undefined && email != "") && (pass != null && pass != undefined && pass != ""))
 }
 
@@ -13,7 +14,7 @@ export function Root(req, res){
     res.send("ROOT endpoint working and reacheable")
 }
 
- /* UTILITY ROUTES */
+/* UTILITY ROUTES */
 expressServer.router('app').post('/login', Login)
 expressServer.router('app').get("/login", Login)
 export async function Login(req, res){    
@@ -37,14 +38,22 @@ expressServer.router('app').post('/signup', SignUp)
 expressServer.router('app').get('/signup', SignUp)
 export async function SignUp(req, res){
 
+    let data = req.body
     //Check if the email and password are correct
-    if(CheckEmailAndPass(req.body.email, req.body.password) == false){
+    if(CheckEmailAndPass(data.email, data.password) == false){
         res.send("Email and Password don't match backend criterion. Values either undefined or null")
         return false;
     }
 
     //Create the user in auth.users table by creating new SupaUser() objcet
-    let response = await database.eventgo_schema().SupaUser(req.query).Create();
+    let SupaUser = database.eventgo_schema().SupaUser(data)
+    let created  = await SupaUser.Create();
+    let response = false;
+
+    if(created){
+        response = SupaUser.LatestOperationData();
+    }
+
     console.log(response, "server route signup")
     
     //If the creation response was not successfull in creating
