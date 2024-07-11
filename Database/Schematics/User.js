@@ -9,6 +9,7 @@ export class SupabaseUser extends BaseEntity{
         this.attributes = attributes
         this.user_session = null;
         this.redirect_url = null;
+        
         if(this.attributes !== null){
             this.attributes={
                 email:attributes['email'], password:attributes['password'],
@@ -23,38 +24,44 @@ export class SupabaseUser extends BaseEntity{
             }
         }
     }
-
+    
 async Create(){
     console.log(this.attributes, "Sign Up attributes")
     const{data, error} = await supabaseClient.auth.signUp(this.attributes)
-    
+    this.latest_crud_operation_data = {data:data, error:error, operation:"Create"}
+    //same as if(error){}
     if(error != undefined && error != null){
         console.log("\x1b[31m"+error+"\x1b[0m", "Class SupabaseUser: Create() tracer"); 
         return false
     }
+
     else if(data !== undefined && data != null){
+        console.log("\x1b[31m"+data+"\x1b[0m", "Class SupabaseUser: Create() tracer"); 
         console.log("User Created successfully")
         console.log("Created User", data)
-        return data;
+        return true;
     }
 }
 
 async Delete(){
     let{data, error} = await supabaseAdminClient.auth.admin.deleteUser(this.attributes.ID)
     console.log(data, error, "Class SupabaseUser: Delete() tracer")
-    if(data){return false}
+    this.latest_crud_operation_data = {data:data, error:error, operation:"Delete"}
+    if(data){return true}
     else if(error){return false}
 }
 
 async Update(){
     let{data, error} = await supabaseAdminClient.auth.updateUser(this.attributes)
     console.log(data, error, "Class SupabaseUser: Update() tracer")
+    this.latest_crud_operation_data = {data:data, error:error, operation:"Update"}
     if(data)return true;
     else if(error)return false;
 }
 
 async Exists(){
     let{data, error} = await supabaseAdminClient.auth.admin.getUserById(this.attributes.ID)
+    this.latest_crud_operation_data = {data:data, error:error, operation:"Exists"}
     if(data)return true;
     else if(error)return false;
 }

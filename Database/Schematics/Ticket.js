@@ -1,6 +1,8 @@
 import { BaseEntity } from "./BaseEntity.js";
 import { Transaction } from "./Transaction.js";
+import { TicketQRCode } from "./TicketQRCode.js";
 import { supabaseAdminClient, supabaseClient } from "./Supabase.js";
+
 
 export class Ticket extends BaseEntity{
     //looks good

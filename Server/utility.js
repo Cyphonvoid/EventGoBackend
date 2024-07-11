@@ -6,12 +6,15 @@ export class ServerResponse{
         this.response = {
             'Error':false,
             'ErrorDetail':null,
-            'Response':message,
+            'Response':22,
             'ResponseDetail':null,
         }
+
+        this.response['Response'] = message;
     }
 
     set_response(message){this.response['Response'] = message}
+
     set_not_sucess(detail){
         this.response['ResponseDetail'] = null
         this.response['Error'] = true;
