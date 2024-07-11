@@ -48,7 +48,7 @@ export class Ticket extends BaseEntity{
     }
 
     async Delete(){
-        let response = await supabaseAdminClient.fron('Tickets').delete()
+        let response = await supabaseAdminClient.from('Tickets').delete()
         .eq('ID', this.attributes.ID).eq('TicketID', this.attributes.TicketID)
         console.log(response, "Class Ticker Delete() tracer");
         if(response.error == null || response.error == undefined){console.log("Delete():", true);return true}
