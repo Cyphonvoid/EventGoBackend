@@ -16,18 +16,19 @@ async function StripeGateway(req, res){
         //call the stripe api to process payment
         let stripe_response = false;
         //create resources in database
-        let queued = await database.eventgo_schema().ProcessedTicket(req.body).Create()
+        let queued = await database.eventgo_schema().ProcessedTicket(req.body.record).Create()
         //also AES encrypt the qr_token 
+        let record = req.body.record
         let data = {/*Some filtered data from req.body + other things + qr_token + encrypted_aes_token*/
-            BusinessID:req.body.BusinessID,
-            TicketID:req.body.TicketID,
-            ShowID:req.body.ShowID,
+            BusinessID:record.BusinessID,
+            TicketID:record.TicketID,
+            ShowID:record.ShowID,
             TransactionID:null,
             EncryptedToken:"Akjhd8alka3A80JKFL2 fake token",
             TicketExpiry:null
         }
         let qr_generated = await database.eventgo_schema().TicketQRCode(data).Create()
-        let deleted = await database.eventgo_schema().Ticket(req.body).Delete();
+        let deleted = await database.eventgo_schema().Ticket(req.body.record).Delete();
         //let deleted = true;
         if(queued + qr_generated != 2 && deleted == true){
             res.send("resource couldn't be created. Error occured while processing transactions")
