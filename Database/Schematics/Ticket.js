@@ -160,7 +160,7 @@ export class ProcessedTicket extends BaseEntity{
         let {error} = response;
         console.log("response=",response, "Class ProcessedTicket Create() tracer");
         if(error){console.log("Create():", false); return false}
-        else{console.log("Create():", false); return true}
+        else{console.log("Create():", true); return true}
     }
 
     async Delete(){

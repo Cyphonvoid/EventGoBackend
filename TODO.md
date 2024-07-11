@@ -42,3 +42,5 @@ frontend then sends this encryption to backend which validates it and displays w
 
 
 @fix the webhook for creating processedtransaction and qr code. Seems like it's not inserting it cuz of old_record column in system cache it can't find it. and other cascading problems. But evverything runs fine from localhost and postman. So error has to be something else. 
+
+if we push tickets into processtickets then it deletes it from tickets table as soon as it gets created there. need better sp;ution
