@@ -35,5 +35,7 @@ then gets passed onto frontend
 frontend then sends this encryption to backend which validates it and displays whether the user has actually bought ticket or not.
 
 
-
+1) Merging StripeAPI connect account with EventGo
+2) Possibility of webhooks for processing payments
+3) Issuing QR code for processing payments
 

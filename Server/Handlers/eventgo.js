@@ -257,6 +257,12 @@ async function BuyTicket(){
      * it can then either call secure endpoint on backend or self process transacction.
      * in our case since we will use stripe API through
      */
+
+    /** IDEA OF BUYING A TICKET
+     *  Merge the schemas from stripe api and eventgo together. 
+     *  Initiate stripe payment
+     */
+    let data = req.body
     let access_token = req.query['access_token']
     let response = await database.supabase_client().auth.signInWithPassword(req.query)
 
@@ -277,6 +283,14 @@ async function BuyTicket(){
 
         //NOTE: Use paramters or body to get the ticket details as well
         let user = await database.eventgo_schema().EventGoUser(details).BuyTicket(req.body.Ticket)
+
+        //Process the stripe transaction here.
+        /**
+         * 1) Process the transaction using stripe here
+         * 2) Filter and process ticket details before creating a ticket
+         * 3) Create a ticket for user entity then it will bought by user entity.
+         */
+        //End of stripe transaction
         return false;
     }
     res.send("couldn't extract sesion and user")

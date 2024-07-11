@@ -9,7 +9,7 @@ export class SupabaseUser extends BaseEntity{
         this.attributes = attributes
         this.user_session = null;
         this.redirect_url = null;
-        this.latest_crud_operation_data = null;
+        
         if(this.attributes !== null){
             this.attributes={
                 email:attributes['email'], password:attributes['password'],
@@ -24,12 +24,7 @@ export class SupabaseUser extends BaseEntity{
             }
         }
     }
-
-
-      LatestOperationData(){
-        return this.latest_crud_operation_data;
-      }
-      
+    
 async Create(){
     console.log(this.attributes, "Sign Up attributes")
     const{data, error} = await supabaseClient.auth.signUp(this.attributes)

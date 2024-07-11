@@ -26,6 +26,7 @@ export class TicketQRCode extends BaseEntity{
     async Create(){
         let{error} = await supabaseAdminClient.schema('public').from('TicketQRCodes').insert(this.attributes)
         console.log(error, "Class TicketQRCode Create() tracer");
+        this.latest_crud_operation_data = {error:error, operation:"Create()"}
         if(error){console.log("Create():", false); return false}
         else{console.log("Create():", false); return true}
     }
@@ -35,6 +36,7 @@ export class TicketQRCode extends BaseEntity{
         .eq('ID', this.attributes.ID)
 
         console.log(response, "Class TicketQRCode Delete() tracer");
+        this.latest_crud_operation_data = {error:response.error, operation:"Delete()"}
         if(response.error == null || response.error == undefined){console.log("Delete():", true);return true}
         console.log("Delete()", false)
         return false;
@@ -44,6 +46,7 @@ export class TicketQRCode extends BaseEntity{
         let {error} = await supabaseAdminClient.from('TicketQRCodes').update(this.attributes)
         .eq('ID', this.attributes.ID)
         console.log(error, "Class TicketQRCode Update() tracer");
+        this.latest_crud_operation_data = {error:response.error, operation:"Update()"}
         if(error){console.log("Update():", false); return false}
         else{console.log("Update():", true); return true;}
     }
@@ -52,6 +55,7 @@ export class TicketQRCode extends BaseEntity{
         let{data, error} = await supabaseAdminClient.from('TicketQRCodes').select()
         .eq('ID', this.attributes.ID)
         console.log(error, "Class TicketQRCode Exists() tracer");
+        this.latest_crud_operation_data = {error:response.error, operation:"Exists()"}
         if(data != null && data != undefined && data.length > 0){console.log("Exists(): ", true); return true}
         else {console.log("Exists():", false); return false}
     }
@@ -59,6 +63,7 @@ export class TicketQRCode extends BaseEntity{
     async Search(){
         let {data, error} = await supabaseAdminClient.from('TicketQRCodes').select().match(this.attributes)
         console.log(data, error, " TicketQRCode Search() tracer")
+        this.latest_crud_operation_data = {error:response.error, operation:"Search()"}
         if(error == null && (data != null && data != undefined)){
             console.log("Search():", true)
             return data;
