@@ -163,7 +163,7 @@ export class ProcessedTicket extends BaseEntity{
     }
 
     async Delete(){
-        let response = await supabaseAdminClient.fron('ProcessedTickets').delete()
+        let response = await supabaseAdminClient.from('ProcessedTickets').delete()
         .eq('ID', this.attributes.ID).eq('TicketID', this.attributes.TicketID)
         console.log(response, "Class ProcessedTicket Delete() tracer");
         if(response.error == null || response.error == undefined){console.log("Delete():", true);return true}
