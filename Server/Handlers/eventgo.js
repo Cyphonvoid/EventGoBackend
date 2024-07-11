@@ -275,10 +275,7 @@ async function BuyTicket(){
      * in our case since we will use stripe API through
      */
 
-    /** IDEA OF BUYING A TICKET
-     *  Merge the schemas from stripe api and eventgo together. 
-     *  Initiate stripe payment
-     */
+
     let data = req.body
     let access_token = req.query['access_token']
     let response = await database.supabase_client().auth.signInWithPassword(req.query)
@@ -288,7 +285,7 @@ async function BuyTicket(){
         //Get the user and create the ticket now
         let user_data = await database.supabase_client().auth.getUser(access_token)
         console.log(user_data, "/createTicket tracer")
-        res.send("extracted session and user successfully")
+        console.log("extracted session and user successfully")
 
         let details = {
             UserID:req.data.user.id,
@@ -298,22 +295,21 @@ async function BuyTicket(){
             SupabaseUserID:"random_id"
         }
 
-        //NOTE: Use paramters or body to get the ticket details as well
-        let user = await database.eventgo_schema().EventGoUser(details).BuyTicket(req.body.Ticket)
+        //BuyTicket will update an existing ticket to 'bought'
+        let ticket = await database.eventgo_schema().EventGoUser(details).BuyTicket(req.body.Ticket)
+        let ticket_details = ticket.Attributes();
 
-        //Process the stripe transaction here.
-        /**
-         * 1) Process the transaction using stripe here
-         * 2) Filter and process ticket details before creating a ticket
-         * 3) Create a ticket for user entity then it will bought by user entity.
-         */
-        //End of stripe transaction
+        //Push the ticket into stripe processing queue
+        let processed_ticket = await database.eventgo_schema().ProcessedTicket(ticket_details).Create();
+        if(processed_ticket){
+            res.send("Failed to push ticket into stripe processing queue")
+            return true;
+        }
+        res.send("Successfully pushed ticket to stripe processing queue")
         return false;
     }
     res.send("couldn't extract sesion and user")
 }
-
-
 
 expressServer.router('app').post('/findTicket', SearchTicket)
 expressServer.router('app').get('/findTicket', SearchTicket)

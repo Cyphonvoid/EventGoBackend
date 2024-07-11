@@ -74,6 +74,7 @@ constructor(attributes=null){
 
     this._supabase_user = null;
     this.list = ['UserID', 'Address', 'Email', 'Password']
+    this._ticket = new Ticket(null);
 
     if(attributes !== null){
         this.attributes = attributes
@@ -132,9 +133,12 @@ async Exists(){
     else {return false}
 }
 
+
+
 async BuyTicket(ticket_details){
-   
-    let ticket = new Ticket(ticket_details)
+    
+    this._ticket.SetAttributes(ticket_details)
+    let ticket = this._ticket;
     let value = await ticket.GetAvailableTicket()
     console.log(value, " BuyTicket() line 579")
     //Since there's no more ticket left we will return null;
@@ -156,7 +160,11 @@ async BuyTicket(ticket_details){
     else{
         console.log("couldn't generate transaction after purchase")
     }
-    return success
+
+    if(success){
+        return this._ticket
+    }
+    return false;
 }
 
 async AddPaymentMethod(){
