@@ -12,6 +12,20 @@ async function AddPaymentMethod(req, res){
 
 expressServer.router('app').post('/stripeTransaction', StripeGateway)
 async function StripeGateway(req, res){
+    
+        //call the stripe api to process payment
+        let stripe_response = false;
+        //create resources in database
+        let queued = await database.eventgo_schema().ProcessedTicket(req.body).Create()
+        //also AES encrypt the qr_token 
+        let data = {/*Some filtered data from req.body + other things + qr_token + encrypted_aes_token*/}
+        let qr_generated = await database.eventgo_schema().TicketQRCode(data).Create()
+        let deleted = await database.eventgo_schema().Ticket(req.body).Delete();
 
-    let response = await database.eventgo_schema()
+        if(queued + qr_generated != 2 && deleted == true){
+            res.send("resource couldn't be created. Error occured while processing transactions")
+        }
+        res.send("transaction completed, transaction status: " + String(stripe_response));
+    
+    res.send("Ticket couldn't be deleted")
 }

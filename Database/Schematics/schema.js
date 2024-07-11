@@ -13,5 +13,5 @@ import { ProcessedTicket } from "./Ticket.js";
 export {
     supabaseAdminClient, supabaseClient,
     EventGoBusiness, Show, Ticket, Transaction, SupabaseUser, EventGoUser, CombinedUser,
-    BaseEntity
+    BaseEntity, ProcessedTicket, TicketQRCode
 }

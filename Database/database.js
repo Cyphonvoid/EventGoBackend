@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { SupabaseUser, EventGoUser, EventGoBusiness, CombinedUser, Transaction, Show, Ticket} from "./Schematics/schema.js"
+import { SupabaseUser, EventGoUser, EventGoBusiness, CombinedUser, Transaction, Show, Ticket, ProcessedTicket, TicketQRCode} from "./Schematics/schema.js"
 import { SUPA_ANON_KEY, SUPA_SERVICE_KEY, SUPA_URL } from "./Schematics/Supabase.js";
 export class DatabaseSchema{
     constructor(){
@@ -12,7 +12,8 @@ export class DatabaseSchema{
     Transaction(attributes){return new Transaction(attributes)}
     Show(attributes){return new Show(attributes)}
     Ticket(attributes){return new Ticket(attributes)}
-    ProcessedTicket(attributes){return new ProcessedTicket}
+    ProcessedTicket(attributes){return new ProcessedTicket(attributes)}
+    TicketQRCode(attributes){return new TicketQRCode(attributes)}
 }
 
 
