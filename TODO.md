@@ -39,3 +39,6 @@ frontend then sends this encryption to backend which validates it and displays w
 2) Possibility of webhooks for processing payments
 3) Issuing QR code for processing payments
 
+
+
+@fix the webhook for creating processedtransaction and qr code. Seems like it's not inserting it cuz of old_record column in system cache it can't find it. and other cascading problems. But evverything runs fine from localhost and postman. So error has to be something else. 

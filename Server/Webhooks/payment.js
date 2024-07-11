@@ -12,7 +12,7 @@ export async function AddPaymentMethod(req, res){
 expressServer.router('app').post('/stripeTransaction', StripeGateway)
 async function StripeGateway(req, res){
 
-        //console.log(req.body, "this is request body");
+        console.log(req.body, "this is request body");
         //call the stripe api to process payment
         let stripe_response = false;
         //create resources in database
