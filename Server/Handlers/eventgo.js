@@ -1,3 +1,4 @@
+import { Ticket } from "../../Database/Schematics/Ticket.js";
 import { expressServer, database } from "../server_tools.js"
 
 expressServer.use_cors(false);
@@ -221,6 +222,22 @@ async function CreateTicket(req, res){
     return false;
 }
 
+
+/* TICKET ENTITY ROUTE */
+expressServer.router('app').post('/NewCreateTicket', NewCreateTicket)
+expressServer.router('app').get('/NewCreateTicket', NewCreateTicket)
+async function NewCreateTicket(req, res){
+
+    let ticket = new Ticket(req.body)
+    let ticket_success = await ticket.Create();
+
+    if(ticket_success == true){res.send("Ticket created successfullyy"); return true}
+    res.send("Couldn't Create ticket")
+
+    return false;
+}
+
+
 expressServer.router('app').post('/cancelTicket', CancelTicket)
 expressServer.router('app').get('/cancelTicket', CancelTicket)
 async function CancelTicket(req, res){
@@ -383,3 +400,4 @@ async function SearchShow(req, res){
     let result = await show.Search();
     res.json(result)
 }
+

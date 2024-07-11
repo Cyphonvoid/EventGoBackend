@@ -44,7 +44,7 @@ export class Ticket extends BaseEntity{
         let{error} = await supabaseAdminClient.schema('public').from('Tickets').insert(this.attributes)
         console.log(error, "Class Ticker Create() tracer");
         if(error){console.log("Create():", false); return false}
-        else{console.log("Create():", false); return true}
+        else{console.log("Create():", true); return true}
     }
 
     async Delete(){
@@ -156,8 +156,9 @@ export class ProcessedTicket extends BaseEntity{
     }
 
     async Create(){
-        let{error} = await supabaseAdminClient.schema('public').from('Tickets').insert(this.attributes)
-        console.log(error, "Class ProcessedTicket Create() tracer");
+        let response = await supabaseAdminClient.schema('public').from('ProcessedTickets').insert(this.attributes)
+        let {error} = response;
+        console.log("response=",response, "Class ProcessedTicket Create() tracer");
         if(error){console.log("Create():", false); return false}
         else{console.log("Create():", false); return true}
     }

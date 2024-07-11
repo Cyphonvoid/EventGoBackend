@@ -28,7 +28,7 @@ export class TicketQRCode extends BaseEntity{
         console.log(error, "Class TicketQRCode Create() tracer");
         this.latest_crud_operation_data = {error:error, operation:"Create()"}
         if(error){console.log("Create():", false); return false}
-        else{console.log("Create():", false); return true}
+        else{console.log("Create():", true); return true}
     }
 
     async Delete(){
