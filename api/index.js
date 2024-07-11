@@ -1,4 +1,4 @@
-import { Access, Payment, Authenticator, EventGo} from "../Server/Handlers/handlers.js";
+import * as modules from "../Server/Handlers/handlers.js";
 import { expressServer } from "../Server/server_tools.js";
 
 
