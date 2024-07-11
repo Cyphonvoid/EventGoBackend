@@ -55,3 +55,8 @@ export async function GetUserSessionByEmailAndPass(email, pass){
     let {data, error} = await supabaseAdminClient.auth.signInWithPassword({email:email, password:pass})
     return data.data.session
 }
+
+export async function GetUserByAccessToken(access_token){
+    let user_data = await supabaseAdminClient.auth.getUser(access_token)
+    return user_data;
+}

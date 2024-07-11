@@ -41,8 +41,9 @@ export class Ticket extends BaseEntity{
     }
 
     async Create(){
-        let{error} = await supabaseAdminClient.schema('public').from('Tickets').insert(this.attributes)
-        console.log(error, "Class Ticker Create() tracer");
+        let response = await supabaseAdminClient.schema('public').from('Tickets').insert(this.attributes)
+        let {error} = response
+        console.log("response=",response, "Class Ticker Create() tracer");
         if(error){console.log("Create():", false); return false}
         else{console.log("Create():", true); return true}
     }
