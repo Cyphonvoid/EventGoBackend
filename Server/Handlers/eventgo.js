@@ -1,5 +1,6 @@
 import { Ticket } from "../../Database/Schematics/Ticket.js";
 import { expressServer, database } from "../server_tools.js"
+import { GetUserByAccessToken } from "../utility.js";
 
 expressServer.use_cors(false);
 /* USER ACCOUNT ENTITY  ROUTE */
@@ -266,49 +267,45 @@ async function CancelTicket(req, res){
 
 expressServer.router('app').post("/buyTicket", BuyTicket)
 expressServer.router('app').get("/buyTicket", BuyTicket)
-async function BuyTicket(){
-    /**
-     * In order to buy ticket the user object will generate it
-     * after the ticket has been created it will create a transaction as well.
-     * to process transaction, a webhook can be configured to listen for generated transaction.
-     * it can then either call secure endpoint on backend or self process transacction.
-     * in our case since we will use stripe API through
-     */
+async function BuyTicket(req, res){
+    
+    //Fetch user details
+    let access_token = req.body.user.access_token
+    if(access_token == null || access_token == "" ){res.send("ERROR: Please provide a access token"); return false}
+    let user_data = GetUserByAccessToken(access_token)
+    if(user_data == null || user_data == ""){res.send("ERROR: access_token is invalid. Couldn't get userdata"); return false}
 
-
-    let data = req.body
-    let access_token = req.query['access_token']
-    let response = await database.supabase_client().auth.signInWithPassword(req.query)
-
-    if(access_token != undefined && access_token != null && response != undefined && response != null){
-
-        //Get the user and create the ticket now
-        let user_data = await database.supabase_client().auth.getUser(access_token)
-        console.log(user_data, "/createTicket tracer")
-        console.log("extracted session and user successfully")
-
-        let details = {
-            UserID:req.data.user.id,
-            Email:req.data.user.email,
-            Password:req.data.user.password,
-            Address:req.data.user.Address,
-            SupabaseUserID:"random_id"
-        }
-
-        //BuyTicket will update an existing ticket to 'bought'
-        let ticket = await database.eventgo_schema().EventGoUser(details).BuyTicket(req.body.Ticket)
-        let ticket_details = ticket.Attributes();
-
-        //Push the ticket into stripe processing queue
-        let processed_ticket = await database.eventgo_schema().ProcessedTicket(ticket_details).Create();
-        if(processed_ticket){
-            res.send("Failed to push ticket into stripe processing queue")
-            return true;
-        }
-        res.send("Successfully pushed ticket to stripe processing queue")
+    //Fetch ticket details. 
+    let ticket_data = req.body.ticket
+    let ticket = new Ticket(ticket_data)
+    let synced = await ticket.Synchronize()  //Needs TicketID and ID to synchronize
+    if(!synced){
+        res.send("TicketID and ID fields not present to fetch data on backend")
         return false;
     }
-    res.send("couldn't extract sesion and user")
+    let ticket_details = ticket.Attributes();
+
+    //Make the user buy ticket
+    let user = await database.eventgo_schema().EventGoUser(user_data)
+    let bought = await user.BuyTicket(ticket_details)
+
+    if(!bought){
+        res.send("ERROR: Ticket couldn't be purchased by user with details" + JSON.stringify(user_data))
+        return false;
+    }
+
+    //Freshly resyncing to get latest data
+    let fresh_sync = await ticket.Synchronize();             
+    if(!fresh_sync){res.send("Error: Couldn't fresh sync ticket data"); return false}
+    
+    //Push the ticket to stripe processing queue
+    ticket_details = ticket.Attributes(); 
+    let pushed = await database.eventgo_schema().ProcessedTicket(ticket_details).Create();
+    if(!pushed){res.send("Couldn't push ticket to stripe processing queue"); return false;}
+    
+    res.send("pushed ticket to stripe processing queue")
+    return true;
+   
 }
 
 expressServer.router('app').post('/findTicket', SearchTicket)
