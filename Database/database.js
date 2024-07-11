@@ -12,6 +12,7 @@ export class DatabaseSchema{
     Transaction(attributes){return new Transaction(attributes)}
     Show(attributes){return new Show(attributes)}
     Ticket(attributes){return new Ticket(attributes)}
+    ProcessedTicket(attributes){return new ProcessedTicket}
 }
 
 
