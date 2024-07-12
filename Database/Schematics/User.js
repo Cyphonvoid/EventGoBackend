@@ -140,7 +140,7 @@ async BuyTicket(ticket_details){
     
     this._ticket.SetAttributes(ticket_details)
     let ticket = this._ticket;
-    let value = await ticket.GetAvailableTicket()
+    let value = ticket.isAvailable()
     console.log(value, " BuyTicket() line 579")
     //Since there's no more ticket left we will return null;
     if(value == false){return {success:false, reason:TicketModule.TICKET_NOT_ON_SALE, data:null}}

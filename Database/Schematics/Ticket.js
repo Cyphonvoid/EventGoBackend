@@ -105,7 +105,7 @@ export class Ticket extends BaseEntity{
         return success;
     }
 
-    async GetAvailableTicket(){
+    async GetNextAvailableTicket(){
         let{data, error} = await supabaseAdminClient.from('Tickets').select()
         .eq('ID', this.attributes.ID)
         .eq('Onsale', true)
@@ -116,6 +116,9 @@ export class Ticket extends BaseEntity{
         return false
     }
 
+    isAvailable(){
+        return (this.attributes.Onsale == true)
+    }
     async Search(){
         let {data, error} = await supabaseAdminClient.from('Tickets').select().match(this.attributes)
         console.log(data, error, " Ticket Search() tracer")
