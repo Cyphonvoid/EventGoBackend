@@ -35,8 +35,12 @@ async function StripeGateway(req, res){
         let qr_generated = await database.eventgo_schema().TicketQRCode(data).Create();
         let deleted = await database.eventgo_schema().Ticket(req.body.record).Delete();
         //let deleted = true;
-        if(queued + qr_generated != 2 && deleted == true){
-            res.send("resource couldn't be created. Error occured while processing transactions")
+        let response = null;
+        if(qr_generated == false){message += "QR Code not generated"}
+        if(deleted == false){message += "Ticket not deleted"}
+        
+        if(response != null){
+            res.send("ERROR: Resources couldn't be created", message)
             return false;
         }
         else{res.send("transaction completed, transaction status: "); return true}
