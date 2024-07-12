@@ -288,19 +288,11 @@ async function BuyTicket(req, res){
     let user_data = await GetUserByAccessToken(access_token)
     if(user_data === null || user_data === false || user_data === undefined){res.send("ERROR: access_token is invalid. Couldn't get userdata"); return false}
 
-    //Fetch ticket details. 
-    let ticket_data = req.body.ticket
-    let ticket = new Ticket(ticket_data)
-    let synced = await ticket.Synchronize()  //Needs TicketID and ID to synchronize
-    if(!synced){
-        res.send("TicketID and ID fields not present to fetch data on backend")
-        return false;
-    }
-    let ticket_details = ticket.Attributes();
-
+     
     //Make the user buy ticket
     let user = await database.eventgo_schema().EventGoUser(user_data)
-    let bought = await user.BuyTicket(ticket_details)
+    let bought = await user.BuyTicket(ticket_data)
+    //NOTE: BuyTicket given details automatically, syncs ticket and checks existence of ticket.
 
     if(bought.success == false){
         res.json({success:false, reason:bought.reason, user:{...user_data}})
