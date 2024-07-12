@@ -1,5 +1,6 @@
 import {BaseEntity} from "./BaseEntity.js";
 import {Ticket} from "./Ticket.js";
+import * as TicketModule from "./Ticket.js";
 import { supabaseAdminClient, supabaseClient } from "./Supabase.js";
 
 
@@ -138,12 +139,11 @@ async Exists(){
 async BuyTicket(ticket_details){
     
     this._ticket.SetAttributes(ticket_details)
-    this._ticket.Update();
     let ticket = this._ticket;
     let value = await ticket.GetAvailableTicket()
     console.log(value, " BuyTicket() line 579")
     //Since there's no more ticket left we will return null;
-    if(value == false){return null}
+    if(value == false){return {success:false, reason:TicketModule.TICKET_NOT_ON_SALE, data:null}}
 
     ticket_details = ticket.Attributes()
     ticket_details.CustomerID = this.attributes.UserID
@@ -163,9 +163,9 @@ async BuyTicket(ticket_details){
     }
 
     if(success){
-        return this._ticket
+        return {success:true, reason:TicketModule.TICKET_UPDATED, data:this._ticket}
     }
-    return false;
+    return {success:false, reason:TicketModule.TICKET_NOT_UPDATED, data:null};
 }
 
 async AddPaymentMethod(){

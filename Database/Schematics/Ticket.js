@@ -4,6 +4,15 @@ import { TicketQRCode } from "./TicketQRCode.js";
 import { supabaseAdminClient, supabaseClient } from "./Supabase.js";
 
 
+export const TICKET_NOT_ON_SALE = 'ticket not on sale'
+export const TICKET_ON_SALE = 'ticket is on sale'
+export const TICKET_UPDATED = 'ticket updated'
+export const TICKET_NOT_UPDATED = 'ticket not updated'
+export const TICKET_CREATEED = 'ticket created'
+export const TICKET_NOT_CREATED = 'ticket not created'
+export const TICKET_DELETED = 'ticket deleted'
+export const TICKET_NOT_DELETED = 'ticket not deleted'
+
 export class Ticket extends BaseEntity{
     //looks good
     constructor(attributes=null){

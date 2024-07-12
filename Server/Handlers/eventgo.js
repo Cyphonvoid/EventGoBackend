@@ -1,5 +1,6 @@
 import { use } from "chai";
 import { Ticket } from "../../Database/Schematics/Ticket.js";
+import * as TicketModule from "../../Database/Schematics/Ticket.js";
 import { expressServer, database } from "../server_tools.js"
 import { GetUserByAccessToken } from "../utility.js";
 
@@ -301,8 +302,8 @@ async function BuyTicket(req, res){
     let user = await database.eventgo_schema().EventGoUser(user_data)
     let bought = await user.BuyTicket(ticket_details)
 
-    if(!bought){
-        res.send("ERROR: Ticket couldn't be purchased by user with details" + JSON.stringify(user_data))
+    if(bought.success == false){
+        res.json({success:false, reason:bought.reason, user:{...user_data}})
         return false;
     }
 
