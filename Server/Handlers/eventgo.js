@@ -291,10 +291,11 @@ async function BuyTicket(req, res){
     
     //Make the user buy ticket
     let user = await database.eventgo_schema().EventGoUser(user_data)
+    let ticket_details = req.body.ticket
     let bought = await user.BuyTicket(ticket_details)
-
+    //NOTE: BuyTicket already syncs the ticket, and checks existence of ticket as well.
     if(bought.success == false){
-        res.json({success:false, reason:bought.reason, user:{...user_data}})
+        res.json({success:false, reason:bought.reason, user:user_data})
         return false;
     }
 

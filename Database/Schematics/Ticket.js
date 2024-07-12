@@ -94,7 +94,7 @@ export class Ticket extends BaseEntity{
             return true;
         }
 
-        console.log("\x1b[31mTicket successfully synchronized\x1b[0m")
+        console.log("\x1b[31mTicket NOT synchronized\x1b[0m")
         console.log("\x1b[31mMaybe data in database doesn't exist\x1b[0m")
         return false;
     }
