@@ -273,16 +273,9 @@ async function BuyTicket(req, res){
     //Fetch user details
     let access_token = null;
     try{
-       let user = req.body.user
-       let ticket = req.body.ticket
-       access_token = req.body.user.access_token
-       let ticket_id = req.body.ticket.TicketID
-       let id = req.body.ticket.ID
-       
-       let data = [user, ticket, access_token, ticket_id, id]
-       for(let i = 0; i < data.length; i++){
-        if(data[i] === undefined){throw new Error("Required fields missing")}
-       }
+       let user = req.body.user; let ticket = req.body.ticket; access_token = req.body.user.access_token; let ticket_id = req.body.ticket.TicketID; 
+       let id = req.body.ticket.ID; let data = [user, ticket, access_token, ticket_id, id]
+       for(let i = 0; i < data.length; i++){if(data[i] === undefined){throw new Error("Required fields missing")}}
     }
     catch(error){
         res.send("ERROR: Some fields are missing required structure is { user:{access_token}, ticket:{ID:null, TicketID:null, ....} }");

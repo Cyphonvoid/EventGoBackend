@@ -74,7 +74,7 @@ constructor(attributes=null){
 
     this._supabase_user = null;
     this.list = ['UserID', 'Address', 'Email', 'Password']
-    this._ticket = new Ticket(null);
+    this._ticket = new Ticket();
 
     if(attributes !== null){
         this.attributes = attributes
@@ -138,6 +138,7 @@ async Exists(){
 async BuyTicket(ticket_details){
     
     this._ticket.SetAttributes(ticket_details)
+    this._ticket.Update();
     let ticket = this._ticket;
     let value = await ticket.GetAvailableTicket()
     console.log(value, " BuyTicket() line 579")
