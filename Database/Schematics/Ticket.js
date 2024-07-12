@@ -86,7 +86,7 @@ export class Ticket extends BaseEntity{
         //Synchronizes the attribute in the database within the object. Then same attributes can be accessed
         let{data, error} = await supabaseAdminClient.from('Tickets').select()
         .eq('ID', this.attributes.ID).eq('TicketID', this.attributes.TicketID)
-        if(data != undefined && data != null){
+        if(data != undefined && data != null && data.length > 0){
             this.attributes = data[0]
             console.log("Ticket successfully synchronized")
             console.log("CURRENT ATTRIBUTES")
