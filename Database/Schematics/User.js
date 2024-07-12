@@ -140,10 +140,14 @@ async BuyTicket(ticket_details){
     
     this._ticket.SetAttributes(ticket_details)
     let ticket = this._ticket;
+    let synced = await ticket.Synchronize();
+    let exists = await ticket.Exists();
     let value = ticket.isAvailable()
     console.log(value, " BuyTicket() line 579")
     //Since there's no more ticket left we will return null;
-    if(value == false){return {success:false, reason:TicketModule.TICKET_NOT_ON_SALE, data:null}}
+    if(synced == false){return {success:false, reason:"ticket failed to synchronized", data:null}}
+    if(exists == false){return {success:false, reason:"Ticket does not exists", data:null}}
+    else if(value == false){return {success:false, reason:TicketModule.TICKET_NOT_ON_SALE, data:null}}
 
     ticket_details = ticket.Attributes()
     ticket_details.CustomerID = this.attributes.UserID
