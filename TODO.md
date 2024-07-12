@@ -43,3 +43,11 @@ frontend then sends this encryption to backend which validates it and displays w
 
 @fix the webhook for creating processedtransaction and qr code. Seems like it's not inserting it cuz of old_record column in system cache it can't find it. and other cascading problems. But evverything runs fine from localhost and postman. So error has to be something else. 
 
+
+
+# to create account 
+
+create supa base user profile
+create regular prpfile
+create a business profile
+store a reference to stripe connect merchant
