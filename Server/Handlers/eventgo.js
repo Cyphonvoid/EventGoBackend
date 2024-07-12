@@ -1,3 +1,4 @@
+import { use } from "chai";
 import { Ticket } from "../../Database/Schematics/Ticket.js";
 import { expressServer, database } from "../server_tools.js"
 import { GetUserByAccessToken } from "../utility.js";
@@ -271,9 +272,9 @@ async function BuyTicket(req, res){
     
     //Fetch user details
     let access_token = req.body.user.access_token
-    if(access_token == null || access_token == "" ){res.send("ERROR: Please provide a access token"); return false}
+    if(access_token == null || access_token == "" || access_token == undefined){res.send("ERROR: Please provide a access token"); return false}
     let user_data = GetUserByAccessToken(access_token)
-    if(user_data == null || user_data == ""){res.send("ERROR: access_token is invalid. Couldn't get userdata"); return false}
+    if(user_data == null || user_data == "" || user_data == undefined){res.send("ERROR: access_token is invalid. Couldn't get userdata"); return false}
 
     //Fetch ticket details. 
     let ticket_data = req.body.ticket
