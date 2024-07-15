@@ -1,6 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
-import { SupabaseUser, EventGoUser, EventGoBusiness, CombinedUser, Transaction, Show, Ticket, ProcessedTicket, TicketQRCode} from "./Schematics/schema.js"
+import Stripe from "stripe";
+import { SupabaseUser, EventGoUser, EventGoBusiness, CombinedUser, Transaction, Show, Ticket, ProcessedTicket, TicketQRCode, StripeAccount} from "./Schematics/schema.js"
 import { SUPA_ANON_KEY, SUPA_SERVICE_KEY, SUPA_URL } from "./Schematics/Supabase.js";
+
+
+
 export class DatabaseSchema{
     constructor(){
 
@@ -14,8 +18,8 @@ export class DatabaseSchema{
     Ticket(attributes){return new Ticket(attributes)}
     ProcessedTicket(attributes){return new ProcessedTicket(attributes)}
     TicketQRCode(attributes){return new TicketQRCode(attributes)}
+    StripeAccount(attribbutes){return new Stripe(attribbutes)}
 }
-
 
 export class EventGoDatabase{
 

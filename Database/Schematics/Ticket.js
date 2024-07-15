@@ -27,7 +27,9 @@ export class Ticket extends BaseEntity{
                 Refundable:null,
                 Confirmed:null,
                 BusinessOwnerID:null,
+                BusinessStripeAccID:null,
                 CustomerID:null,
+                CustomerStripeAccID:null,
                 ShowName:null,
                 TicketID:null
             }

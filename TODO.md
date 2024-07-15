@@ -51,3 +51,35 @@ create supa base user profile
 create regular prpfile
 create a business profile
 store a reference to stripe connect merchant
+
+
+
+# on purchase keep track of the stripe account ID that needs to exist for sure for any transaction.
+
+
+1) Fix and complete QR code feature
+
+2) Complete strupe integration
+
+3) Security layer and encryption with backend access tokens
+
+4) The final User object token to send to frontend
+    the final user object will contain main information about user
+
+5) provide general items owned by user easily through single routes.
+    make all items associated with user accessible using user id
+    - /userTickets will return all tickets associated with user using uuid
+    - /businessShows will return all shows associated with the user uuid
+    - /userQRcodes will return all codes associated with the user uuid
+
+
+    Phase 2 will be complete!
+
+
+Phase 3:
+
+1) Integration testing
+2) UI design
+3) additional tweaking and adjustments,
+maybe stresst esting security backend security layer
+4) migrating backend to a different account all together

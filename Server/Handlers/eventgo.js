@@ -2,7 +2,7 @@ import { use } from "chai";
 import { Ticket } from "../../Database/Schematics/Ticket.js";
 import * as TicketModule from "../../Database/Schematics/Ticket.js";
 import { expressServer, database } from "../server_tools.js"
-import { GetUserByAccessToken } from "../utility.js";
+import { GetUserByAccessToken, ServerResponse } from "../utility.js";
 
 expressServer.use_cors(false);
 /* USER ACCOUNT ENTITY  ROUTE */
@@ -400,3 +400,85 @@ async function SearchShow(req, res){
     res.json(result)
 }
 
+
+
+/***PROFILE ENTITY ROUTES***/
+function ValidField(field){
+    return (field != undefined && field != null)
+}
+
+expressServer.router('app').post('/createProfiles', CreateProfile)
+async function CreateProfile(req, res){
+    
+    let eventgo_user_profile = req.body.eventgo_user
+    let business_profile = req.body.business
+    let stripe_profile = req.body.stripe
+    let access_token = req.body.access_token
+
+    //If the the incoming fields are incorrect
+    if(ValidField(eventgo_user_profile) + ValidField(business_profile) + ValidField(stripe_profile) < 3){
+        let response = ServerResponse("One of the profile section is incorrect")
+        response.set_not_sucess("")
+        res.send(response.get())
+        return false;
+    }
+
+    //If the main user profile already exits then it's assumed every other profile also exists therefore the don't create anymore
+    let ev_already_exists = await database.eventgo_schema().EventGoUser(eventgo_user_profile).Exists();
+    if(ev_already_exists){
+        let response = new ServerResponse("account profile already exists")
+        response.set_not_sucess("profile already exists")
+        res.send(response.get()); return false;
+    }
+
+    //Setting up business profile data first
+    let supa_user_data = GetUserByAccessToken(access_token)
+
+    business_profile.StripeAccID = stripe_profile.id
+    business_profile.ID = supa_user_data.id
+
+    stripe.business_profile.name = business_profile.Name
+    stripe.business_profile.support_address = business_profile.Address
+    stripe.business_profile.support_email = business_profile.Email
+
+    let ev_user_created = await database.eventgo_schema().EventGoUser(eventgo_user_profile).Create();
+    let business_created = await database.eventgo_schema().Business(business_profile).Create();
+    let stripe_created = await database.eventgo_schema().StripeAccount(stripe_profile).Create();
+
+
+    //Check if any of these have been created
+    let total_created = ev_user_created + business_created + stripe_created
+    if(total == 3){
+        let response = ServerResponse("All profiles are successfully created")
+        response.set_sucess("")
+        res.send(response.get())
+        return true;
+    }
+
+    //otherwise let the invoker know that profiles couldn't be created
+    let response = ServerResponse("Only "+String(total_created)+" profiles were created")
+    res.send(response.get())
+    return false;
+}
+
+expressServer.router('app').post('/createUserProfile', CreateUserProfile)
+async function CreateUserProfile(req, res){
+
+}
+
+
+expressServer.router('app').post('/createBusinessProfile', CreateBusinessProfile)
+async function CreateBusinessProfile(req, res){
+
+}
+
+expressServer.router('app').post('/createStripeProfile', CreateStripeProfile)
+async function CreateStripeProfile(req, res){
+
+}
+
+
+
+
+
+/**QR CODE ROUTES**/

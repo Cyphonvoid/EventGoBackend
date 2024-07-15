@@ -10,6 +10,7 @@ export class EventGoBusiness extends BaseEntity{
         if(attributes == null){
             this.attributes = {
                 ID:null,
+                StripeAccID:null,
                 Name:null,
                 Address:null,
                 NetProfit:null

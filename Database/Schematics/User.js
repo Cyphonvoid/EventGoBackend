@@ -74,15 +74,17 @@ export class EventGoUser{
 constructor(attributes=null){
 
     this._supabase_user = null;
-    this.list = ['UserID', 'Address', 'Email', 'Password']
+    this.list = ['ID', 'Address', 'Email', 'Password']
     this._ticket = new Ticket();
 
     if(attributes !== null){
         this.attributes = attributes
     }
+    
     else{
         this.attributes = {
-            UserID:null,
+            ID:null,
+            StripeAccID:null,
             Address:null,
             Email:null,
             Password:null
@@ -112,7 +114,7 @@ async Create(){
 }
 
 async Delete(){
-    const response = await supabaseClient.from('EventGoUsers').delete().eq('UserID', this.attributes.UserID)
+    const response = await supabaseClient.from('EventGoUsers').delete().eq('ID', this.attributes.ID)
     console.log(response, "EventGoUser Delete()")
     if(response.error == null || response.error == undefined){console.log("Delete():", true); return true}
     console.log("Delete():", true); return false;
@@ -122,18 +124,17 @@ async Update(){
     let exists = await this.Exists()
     if(exists == false){console.log("EventGoUser Class Update(): User doesn't exist");return false;}
 
-    let {data, error} = await supabaseAdminClient.from('EventGoUsers').update(this.attributes).eq('UserID', this.attributes.UserID)
+    let {data, error} = await supabaseAdminClient.from('EventGoUsers').update(this.attributes).eq('ID', this.attributes.ID)
     console.log(data, error, "EventGoUser Class Update() Tracer")
     if(error){console.log(false); return false;}
     else{console.log(true); return true;}
 }
 
 async Exists(){
-    let {data, error} = await supabaseAdminClient.from('EventGoUsers').select().eq('UserID', this.attributes.UserID)
+    let {data, error} = await supabaseAdminClient.from('EventGoUsers').select().eq('ID', this.attributes.ID)
     if(data != null && data != undefined && data.length > 0){return true}
     else {return false}
 }
-
 
 
 async BuyTicket(ticket_details){
@@ -150,7 +151,7 @@ async BuyTicket(ticket_details){
     else if(value == false){return {success:false, reason:TicketModule.TICKET_NOT_ON_SALE, data:null}}
 
     ticket_details = ticket.Attributes()
-    ticket_details.CustomerID = this.attributes.UserID
+    ticket_details.CustomerID = this.attributes.ID
     ticket_details.Onsale = false;
     ticket_details.Confirmed = true;
     ticket.SetAttributes(ticket_details)
@@ -182,7 +183,7 @@ async RemovePaymentMethod(){
 
 async __synchronize_with_database_row(){
     let{data, error} = await supabaseAdminClient.from('EventGoUsers').select()
-    .eq('UserID', this.attributes.UserID)
+    .eq('ID', this.attributes.ID)
 
     if(data != undefined && data != null && data.length > 0){
         this.attributes = data[0]
