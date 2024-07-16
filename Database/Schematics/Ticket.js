@@ -278,7 +278,7 @@ export class ProcessedTicket extends BaseEntity{
         .eq('ID', this.attributes.ID).eq('TicketID', this.attributes.TicketID)
         if(data != undefined && data != null && data.length > 0){
             this.attributes = data[0]
-            console.log("Ticket successfully synchronized")
+            console.log("Processed Ticket successfully synchronized")
             console.log("CURRENT ATTRIBUTES")
             console.log(this.attributes)
             return true;

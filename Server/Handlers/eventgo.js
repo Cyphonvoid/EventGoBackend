@@ -244,14 +244,14 @@ async function NewCreateTicket(req, res){
 
 expressServer.router('app').post('/Ticket/GenerateQRToken', GenerateQRToken)
 async function GenerateQRToken(req, res){
-    let ticket = new Ticket(req.body)
-    let exists = await ticket.Exists()
+    let new_ticket = new Ticket(req.body)
+    let exists = await new_ticket.Exists()
 
     let proc_ticket = new TicketModule.ProcessedTicket(req.body)
     let proc_exists = await proc_ticket.Exists();
     if(exists == false && proc_exists == false){res.send("Ticket doesn't exists");return false;}
 
-    ticket = exists == false ? proc_ticket : ticket
+    let ticket = exists == false ? proc_ticket : new_ticket
     //Sync in all the data if it exists
     let synced = await ticket.Synchronize();
     let attributes = ticket.Attributes();
@@ -259,7 +259,7 @@ async function GenerateQRToken(req, res){
     let token_data = {
         ID:attributes.ID,
         BusinessOwnerID:attributes.BusinessOwnerID,
-        TokenID:attributes.TokenID
+        TicketID:attributes.TicketID
     }
 
     attributes.QRToken = JSON.stringify(token_data)
