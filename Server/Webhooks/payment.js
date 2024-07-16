@@ -1,4 +1,4 @@
-import { expressServer, database } from "../server_tools.js";
+import { expressServer, database, ServerResponse } from "../server_tools.js";
 
 expressServer.use_cors(false);
 
@@ -17,14 +17,26 @@ async function StripeGateway(req, res){
         let stripe_response = true;
 
         if(stripe_response == false){
-            let processed_ticket = await database.eventgo_schema().ProcessedTicket(req.body.record)
+            let processed_ticket = await database.eventgo_schema().ProcessedTicket(req.body)
             let deleted = await processed_ticket.Delete();
             if(deleted){var response = " Ticket removed from processed_tickets table"}
             res.send("Stripe transaction processing failed. Didn't create resources in database" + response)
             return false;
         }
 
-        let processed_ticket = await database.eventgo_schema().ProcessedTicket(req.body.record)
+        let processed_ticket = await database.eventgo_schema().ProcessedTicket(req.body)
         let generated = await processed_ticket.GenerateTransaction();
-        let deleted = await database.eventgo_schema().Ticket(req.body.record).Delete();
+        let deleted = await database.eventgo_schema().Ticket(req.body).Delete();
+
+        console.log("generated", generated, " deleted", deleted)
+        if(generated == false || deleted == false){
+            let resp = new ServerResponse("FATAL ERROR: Either ticket transaction or ticket deletion isn't working");
+            resp.set_not_sucess();
+            res.json(resp.get());
+            return false;
+        }
+        let resp = new ServerResponse("Transaction successfull")
+        resp.set_success();
+        res.json(resp.get());
+        return true;
 }

@@ -221,12 +221,13 @@ export class ProcessedTicket extends BaseEntity{
         attributes.TicketID = this.attributes.TicketID
         attributes.Currency = "US Dollars"
         attributes.PaymentType = "Credit"
-
+               
         transaction.SetAttributes(attributes);
         let created = await transaction.Create();
         let tran_synced = await transaction.Synchronize();
         attributes = transaction.Attributes();
 
+        console.log(attributes, " transaction ATTRRR", "created", created, " synced", tran_synced)
         if(created){
             this.attributes.TransactionID = attributes.TransactionID
             let updated = await this.Update();
@@ -275,7 +276,7 @@ export class ProcessedTicket extends BaseEntity{
         //Synchronizes the attribute in the database within the object. Then same attributes can be accessed
         let{data, error} = await supabaseAdminClient.from('ProcessedTickets').select()
         .eq('ID', this.attributes.ID).eq('TicketID', this.attributes.TicketID)
-        if(data != undefined && data != null){
+        if(data != undefined && data != null && data.length > 0){
             this.attributes = data[0]
             console.log("Ticket successfully synchronized")
             console.log("CURRENT ATTRIBUTES")
@@ -283,7 +284,7 @@ export class ProcessedTicket extends BaseEntity{
             return true;
         }
 
-        console.log("\x1b[31mTicket successfully synchronized\x1b[0m")
+        console.log("\x1b[31mTicket not synchronized\x1b[0m")
         console.log("\x1b[31mMaybe data in database doesn't exist\x1b[0m")
         return false;
     }

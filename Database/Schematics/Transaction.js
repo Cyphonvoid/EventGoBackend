@@ -12,12 +12,11 @@ export class Transaction extends BaseEntity{
                 CreatedAt:null,
                 PaymentBy:null,
                 PaymentTo:null,
-                TimeAndDate:null,
                 Amount:null,
                 Currency:null,
                 PaymentType:null,
-                TransactionID:null,
                 TicketID:null
+                //TransactionID:null,
             }
         }
     }
@@ -63,5 +62,26 @@ export class Transaction extends BaseEntity{
         }
         console.log("Search():", false)
         return null;
+    }
+
+    async __synchronize_with_database_row(){
+        //Synchronizes the attribute in the database within the object. Then same attributes can be accessed
+        let{data, error} = await supabaseAdminClient.from('Transactions').select()
+        .eq('ID', this.attributes.ID).eq('TransactionID', this.attributes.TicketID)
+        if(data != undefined && data != null && data.length > 0){
+            this.attributes = data[0]
+            console.log("Ticket successfully synchronized")
+            console.log("CURRENT ATTRIBUTES")
+            console.log(this.attributes)
+            return true;
+        }
+
+        console.log("\x1b[31mTicket not synchronized\x1b[0m")
+        console.log("\x1b[31mMaybe data in database doesn't exist\x1b[0m")
+        return false;
+    }
+    async Synchronize(){
+        let resp = await this.__synchronize_with_database_row();
+        return resp;
     }
 }
