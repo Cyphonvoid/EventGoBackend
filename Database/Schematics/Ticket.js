@@ -222,6 +222,7 @@ export class ProcessedTicket extends BaseEntity{
         attributes.Currency = "US Dollars"
         attributes.PaymentType = "Credit"
 
+        transaction.SetAttributes(attributes);
         let created = await transaction.Create();
         let tran_synced = await transaction.Synchronize();
         attributes = transaction.Attributes();
