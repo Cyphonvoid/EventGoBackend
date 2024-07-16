@@ -17,6 +17,7 @@ export class TicketQRCode extends BaseEntity{
                 ShowID:null,
                 BusinessID:null,
                 TransactionID:null,
+                CustomerID:null,
                 TicketExpiry:null,
                 EncryptedToken:null
             }

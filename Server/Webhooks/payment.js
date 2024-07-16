@@ -17,31 +17,14 @@ async function StripeGateway(req, res){
         let stripe_response = true;
 
         if(stripe_response == false){
-            res.send("Stripe transaction processing failed. Didn't create resources in database")
+            let processed_ticket = await database.eventgo_schema().ProcessedTicket(req.body.record)
+            let deleted = await processed_ticket.Delete();
+            if(deleted){var response = " Ticket removed from processed_tickets table"}
+            res.send("Stripe transaction processing failed. Didn't create resources in database" + response)
             return false;
         }
 
-        //also AES encrypt the qr_token 
-        let record = req.body.record
-        let data = {/*Some filtered data from req.body + other things + qr_token + encrypted_aes_token*/
-            BusinessID:record.BusinessID,
-            TicketID:record.TicketID,
-            ShowID:record.ShowID,
-            TransactionID:null,
-            EncryptedToken:"Akjhd8alka3A80JKFL2 fake token",
-            TicketExpiry:null
-        }
-        
-        let qr_generated = await database.eventgo_schema().TicketQRCode(data).Create();
+        let processed_ticket = await database.eventgo_schema().ProcessedTicket(req.body.record)
+        let generated = await processed_ticket.GenerateTransaction();
         let deleted = await database.eventgo_schema().Ticket(req.body.record).Delete();
-        //let deleted = true;
-        let response = null;
-        if(qr_generated == false){message += "QR Code not generated"}
-        if(deleted == false){message += "Ticket not deleted"}
-        
-        if(response != null){
-            res.send("ERROR: Resources couldn't be created", message)
-            return false;
-        }
-        else{res.send("transaction completed, transaction status: "); return true}
 }

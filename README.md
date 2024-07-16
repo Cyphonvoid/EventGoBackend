@@ -20,7 +20,7 @@ Below is a full list of endpoints that you can connect to
 
 `http://localhost:8888/signout`
  Not funcational at the moment
-
+ 
 
 `http://localhost:8888/hostshow?`
  Not functional at the moment

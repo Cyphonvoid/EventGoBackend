@@ -1,9 +1,10 @@
-import { BaseEntity } from "./BaseEntity";
 import stripe from "./StripeConnect.js";
+import { BaseEntity } from "./BaseEntity.js";
 
-class StripeAccount extends BaseEntity{
+export class StripeAccount extends BaseEntity{
 
     constructor(attributes=null){
+        super();
         this.attributes = attributes
 
         if(attributes == null){
@@ -26,30 +27,52 @@ class StripeAccount extends BaseEntity{
     }
     
     async Create(){
-        if(this.attributes.id == null){return false}
-        let account = await stripe.accounts.create(this.attributes)
-        return account
+        try{
+            let account = await stripe.accounts.create(this.attributes)
+            return {created:true, error:null, data:account}
+        }
+        catch(error){
+            return {created:false, error:error, data:null}
+        }
     }
     
     async Delete(){
-        if(this.attributes.id == null){return false}
-        let response = await stripe.accounts.del(this.attributes.id)
-        return response.deleted
+        try{ let response = await stripe.accounts.del(this.attributes.id); 
+            return {deleted:response.deleted, error:null, data:response}
+        }
+        catch(error){
+            return {deleted:false, error:error}
+        }
     }
     
     async Retrieve(){
-        if(this.attributes.id == null){return false}
-        let response = await stripe.accounts.retrieve(this.attributes.id)
-        return response
+        try{
+            let response = await stripe.accounts.retrieve(this.attributes.id)
+            return {retrieved:true, error:error, data:response}
+        }
+        catch(error){
+            return {retrieved:false, error:error, data:null}
+        }
     }
     
     async Reject(){
-        const account = await stripe.accounts.reject('acct_1032D82eZvKYlo2C',{reason: 'fraud'});
-        return account;
+        try{
+            let account = await stripe.accounts.reject('acct_1032D82eZvKYlo2C',{reason: 'fraud'});
+            return {rejected:true, error:null, data:account}
+        }
+        catch(error){
+            return {rejected:false, error:error}
+        }
     }
-
+    
     async Synchronize(){
-        if(this.attributes.id == null){return false}
-        this.attributes = await stripe.accounts.retrieve(this.attributes.id)
+        try{
+            this.attributes = await stripe.accounts.retrieve(this.attributes.id)
+            return {synchronized:true, error:null, data:this.attributes}
+        }
+        catch(error){
+            return {synchronized:false, error:error, data:null}
+        }
     }
 }
+

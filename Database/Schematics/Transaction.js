@@ -17,6 +17,7 @@ export class Transaction extends BaseEntity{
                 Currency:null,
                 PaymentType:null,
                 TransactionID:null,
+                TicketID:null
             }
         }
     }
@@ -30,6 +31,7 @@ export class Transaction extends BaseEntity{
 
     async Delete(){
         let response = await supabaseAdminClient.from('Transactions').delete().eq('ID', this.attributes.ID)
+        .eq('TransactionID', this.attributes.TransactionID)
         console.log(response, "Class Transaction: Delete() tracer")
         if(response.error == null || response.error == undefined){console.log("Delete():", true);return true}
         console.log("Delete()", false)
@@ -38,6 +40,7 @@ export class Transaction extends BaseEntity{
 
     async Update(){
         let {error} = await supabaseAdminClient.from('Transactions').update(this.attributes).eq('ID', this.attributes.ID)
+        .eq('TransactionID', this.attributes.TransactionID)
         console.log(error, "Class Transaction: Update() tracer")
         if(error){console.log("Update():", false); return false;}
         else console.log("Update():", true); return true;
@@ -45,6 +48,7 @@ export class Transaction extends BaseEntity{
 
     async Exists(){
         let{data, error} = await supabaseAdminClient.from('Transactions').select().eq('ID', this.attributes.ID)
+        .eq('TransactionID', this.attributes.TransactionID)
         console.log(error, "Class Transaction: Exists() tracer")
         if(data != null && data != undefined && data.length > 0){console.log("Exists(): ", true); return true}
         else {console.log("Exists():", false); return false}

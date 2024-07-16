@@ -7,11 +7,12 @@ import { SupabaseUser, EventGoUser, CombinedUser} from "./User.js";
 import { TicketQRCode } from "./TicketQRCode.js";
 import { BaseEntity } from "./BaseEntity.js";
 import { ProcessedTicket } from "./Ticket.js";
-
+import { IntegratedAccount } from "./IntegratedAccount.js"
+import { StripeAccount } from "./Stripe.js";
 
 
 export {
     supabaseAdminClient, supabaseClient,
     EventGoBusiness, Show, Ticket, Transaction, SupabaseUser, EventGoUser, CombinedUser,
-    BaseEntity, ProcessedTicket, TicketQRCode
+    BaseEntity, ProcessedTicket, TicketQRCode, IntegratedAccount, StripeAccount
 }

@@ -1,3 +1,4 @@
+import * as crypto from "crypto"
 
 export class Flag{
     constructor(value=false){
@@ -8,35 +9,24 @@ export class Flag{
     check(){return this.value}
 }
 
-export class UserSession{
 
-    constructor(session=null){
-        if(session == null){this.session = session}
-        else{
-            this.session = {
-
-            }
-        }
-    }
-
-    data(){
-        return this.session
-    }
-}
-
-
-export class JsonFieldExtractor{
+export class Encryptor{
 
     constructor(){
-        this.fields = null
-    }
-
-
-    FieldsToExtract(fields){
-        this.fields = fields;
-    }
-
-    Extract(){
+        this._message = null;
+        this._key = null;
         
+    }
+
+    Message(value){
+        this._message = value;
+    }
+
+    Encrypt(message){
+
+    }
+
+    DefineKey(key){
+
     }
 }

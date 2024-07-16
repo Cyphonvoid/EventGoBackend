@@ -137,7 +137,7 @@ async Exists(){
 }
 
 
-async BuyTicket(ticket_details){
+async ReserveTicket(ticket_details){
     
     this._ticket.SetAttributes(ticket_details)
     let ticket = this._ticket;
@@ -156,16 +156,6 @@ async BuyTicket(ticket_details){
     ticket_details.Confirmed = true;
     ticket.SetAttributes(ticket_details)
     var success = await ticket.Update()
-
-    //Create transaction as well for the purchase
-    let transaction = await ticket.Transaction()
-    let val = await transaction.Create();
-    if(val == true){
-        console.log("transaction after purchase generated")
-    }
-    else{
-        console.log("couldn't generate transaction after purchase")
-    }
 
     if(success){
         return {success:true, reason:TicketModule.TICKET_UPDATED, data:this._ticket}

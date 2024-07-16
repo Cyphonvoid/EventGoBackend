@@ -3,6 +3,8 @@ import { Ticket } from "../../Database/Schematics/Ticket.js";
 import * as TicketModule from "../../Database/Schematics/Ticket.js";
 import { expressServer, database } from "../server_tools.js"
 import { GetUserByAccessToken, ServerResponse } from "../utility.js";
+import { IntegratedAccount } from "../../Database/Schematics/IntegratedAccount.js";
+import { Transaction } from "../../Database/Schematics/Transaction.js";
 
 expressServer.use_cors(false);
 /* USER ACCOUNT ENTITY  ROUTE */
@@ -233,11 +235,40 @@ async function NewCreateTicket(req, res){
 
     let ticket = new Ticket(req.body)
     let ticket_success = await ticket.Create();
-
     if(ticket_success == true){res.send("Ticket created successfullyy"); return true}
     res.send("Couldn't Create ticket")
 
     return false;
+}
+
+
+expressServer.router('app').post('/Ticket/GenerateQRToken', GenerateQRToken)
+async function GenerateQRToken(req, res){
+    let ticket = new Ticket(req.body)
+    let exists = await ticket.Exists()
+    if(exists == false){res.send("Ticket doesn't exists");return false;}
+
+    //Sync in all the data if it exists
+    let synced = await ticket.Synchronize();
+    let attributes = ticket.Attributes();
+
+    let token_data = {
+        ID:attributes.ID,
+        BusinessOwnerID:attributes.BusinessOwnerID,
+        TokenID:attributes.TokenID
+    }
+
+    attributes.QRToken = JSON.stringify(token_data)
+    ticket.SetAttributes(attributes)
+
+    let updated = await ticket.Update();
+
+    if(updated == false){
+        res.send("Couldn't generate QR Token for the ticket")
+        return false;
+    }
+    res.send({"message":"QR Token successfully generated", "data":attributes.QRToken})
+    return true;
 }
 
 
@@ -292,7 +323,7 @@ async function BuyTicket(req, res){
     //Make the user buy ticket
     let user = await database.eventgo_schema().EventGoUser(user_data)
     let ticket_details = req.body.ticket
-    let bought = await user.BuyTicket(ticket_details)
+    let bought = await user.ReserveTicket(ticket_details)
     //NOTE: BuyTicket already syncs the ticket, and checks existence of ticket as well.
     if(bought.success == false){
         res.json({success:false, reason:bought.reason, user:user_data})
@@ -402,12 +433,33 @@ async function SearchShow(req, res){
 
 
 
-/***PROFILE ENTITY ROUTES***/
+/*********************PROFILE ENTITY ROUTES***********/
 function ValidField(field){
-    return (field != undefined && field != null)
+    let empty = {}
+    return (field != undefined && field != null && field != empty)
 }
 
-expressServer.router('app').post('/createProfiles', CreateProfile)
+function ProfileManager(supa_user_data, eventgo_user_profile, business_profile, stripe_profile){
+    try{
+        if(business_profile.Address !== eventgo_user_profile.Address){
+            return {success:false, error:"business and user address must match same string"}
+         }
+        eventgo_user_profile.ID = supa_user_data.id
+        eventgo_user_profile.Email = supa_user_data.email
+        eventgo_user_profile.Passowrd = supa_user_data.password
+
+        business_profile.ID = supa_user_data.id
+
+        stripe_profile.business_profile.name = business_profile.Name
+        stripe_profile.business_profile.support_address = business_profile.Address
+        stripe_profile.business_profile.support_email = eventgo_user_profile.Email
+        return {success:true, error:null, data:[supa_user_data, eventgo_user_profile, business_profile, stripe_profile]}
+    }catch(error){return {success:false, error:"Maybe some fields are missing!"}}
+}
+
+
+ //TESTING NEEDED
+expressServer.router('app').post('/IntegratedAccount/Create', CreateProfile)
 async function CreateProfile(req, res){
     
     let eventgo_user_profile = req.body.eventgo_user
@@ -418,67 +470,273 @@ async function CreateProfile(req, res){
     //If the the incoming fields are incorrect
     if(ValidField(eventgo_user_profile) + ValidField(business_profile) + ValidField(stripe_profile) < 3){
         let response = ServerResponse("One of the profile section is incorrect")
-        response.set_not_sucess("")
-        res.send(response.get())
-        return false;
+        response.set_not_sucess(""); res.send(response.get()); return false;
     }
+
+    //Further checking if the profiles have missing fields or something
+    let supa_user_data = GetUserByAccessToken(access_token)
+    let response_val = ProfileManager(supa_user_data, eventgo_user_profile, business_profile, stripe_profile)
+    if(response_val.success == false){let Res = new ServerResponse(response_val.error); Res.set_not_sucess(""); res.json(Res.get()); return false;}
+
 
     //If the main user profile already exits then it's assumed every other profile also exists therefore the don't create anymore
     let ev_already_exists = await database.eventgo_schema().EventGoUser(eventgo_user_profile).Exists();
     if(ev_already_exists){
         let response = new ServerResponse("account profile already exists")
-        response.set_not_sucess("profile already exists")
-        res.send(response.get()); return false;
+        response.set_not_sucess("profile already exists"); res.send(response.get()); return false;
     }
 
-    //Setting up business profile data first
-    let supa_user_data = GetUserByAccessToken(access_token)
+    let stripe_acc = await database.eventgo_schema().StripeAccount(stripe_profile)
+    let stripe_created = await stripe_acc.Create();
 
-    business_profile.StripeAccID = stripe_profile.id
-    business_profile.ID = supa_user_data.id
+    //NOTE: StripeAccIDs can't be nullable and must be unique.
+    eventgo_user_profile.StripeAccID = stripe_created.data.id
+    business_profile.StripeAccID = stripe_created.data.id
 
-    stripe.business_profile.name = business_profile.Name
-    stripe.business_profile.support_address = business_profile.Address
-    stripe.business_profile.support_email = business_profile.Email
+    let ev_user = await database.eventgo_schema().EventGoUser(eventgo_user_profile)
+    let ev_user_created = await ev_user.Create();
 
-    let ev_user_created = await database.eventgo_schema().EventGoUser(eventgo_user_profile).Create();
-    let business_created = await database.eventgo_schema().Business(business_profile).Create();
-    let stripe_created = await database.eventgo_schema().StripeAccount(stripe_profile).Create();
+    let business = await database.eventgo_schema().Business(business_profile)
+    let business_created = business.Create();
 
+    if(stripe_created == false || ev_user_created == false || business_created == false){
+        let stripe_deleted = await stripe_acc.Delete();
+        let ev_user_deleted = await ev_user.Delete();
+        let business_deleted = await business.Delete();
 
-    //Check if any of these have been created
-    let total_created = ev_user_created + business_created + stripe_created
-    if(total == 3){
-        let response = ServerResponse("All profiles are successfully created")
-        response.set_sucess("")
-        res.send(response.get())
+        let resp = ServerResponse('Failed to create atleast one profile therefore deleted all profiles')
+        resp.set_not_sucess("Behavior is programmed delete all profiles user, business and stripe if any of them fail to be created")
+        res.json(resp.get());
+        return false;
+    }
+    //Final syncing for all entities before sending latest data 
+    await ev_user.Synchronize();
+    await business.Synchronize();
+    await stripe_acc.Synchronize();
+
+    let user_profile = {
+        eventgo_user:ev_user.Attributes(),
+        business:business.Attributes(),
+        stripe:stripe_acc.Attributes()
+    }
+    let resp = ServerResponse(user_profile)
+    resp.set_not_sucess("All profiles created successfully")
+    res.json(resp.get());
+    return true;
+}
+
+ //TESTING NEEDED
+expressServer.router('app').post('/IntegratedAccount/Delete', CreateUserProfile)
+async function CreateUserProfile(req, res){
+    let eventgo_user_profile = req.body.eventgo_user
+    let business_profile = req.body.business
+    let stripe_profile = req.body.stripe
+    let access_token = req.body.access_token
+
+    //If the the incoming fields are incorrect
+    if(ValidField(eventgo_user_profile) + ValidField(business_profile) + ValidField(stripe_profile) < 3){
+        let response = ServerResponse("One of the profile section is incorrect")
+        response.set_not_sucess(""); res.send(response.get()); return false;
+    }
+
+    var IntegratedAcc = new IntegratedAccount(access_token, eventgo_user_profile, business_profile, stripe_profile)
+    let response = await IntegratedAcc.Delete();
+    if(response.error == true){
+        let resp = ServerResponse(response.details)
+        resp.set_not_sucess(); res.json(resp.get()); return false;
+    }
+
+    let resp = ServerResponse('All connected profiles are deleted')
+    resp.set_sucess(); res.json(resp.get()); return false;
+}
+
+ //TESTING NEEDED
+expressServer.router('app').post('/Profile/EventGoUser/Update', EventGoUserUpdate)
+async function EventGoUserUpdate(req, res){
+
+    //contains the user id as well
+    let ev_user_profile = req.body.eventgo_user
+
+    let ev_user = await database.eventgo_schema().EventGoUser(ev_user_profile);
+    let exists = await ev_user.Exists();
+    if(exists == false){res.send("Account already dodesn't exists to update"); return false;}
+
+    let synced = await ev_user.Synchronize();
+    let updated = await ev_user.Update();
+
+    if(updated){
+        let resp = ServerResponse('Profile successfully updated');
+        resp.set_succes("");
+        res.json(resp);
+        console.log("updated:", updated, " synced:", synced)
         return true;
     }
 
-    //otherwise let the invoker know that profiles couldn't be created
-    let response = ServerResponse("Only "+String(total_created)+" profiles were created")
-    res.send(response.get())
+    let resp = ServerResponse("Profile couldn't be  updated");
+    resp.set_not_sucess("");
+    res.json(resp);
+    console.log("updated:", updated, " synced:", synced)
     return false;
 }
 
-expressServer.router('app').post('/createUserProfile', CreateUserProfile)
-async function CreateUserProfile(req, res){
+//TESTING NEEDED
+expressServer.router('app').post('/Profile/EventGoBusiness/Update', EventGoBusinessUpdate)
+async function EventGoBusinessUpdate(req, res){
+    //contains the user id as well
+    let business_profile = req.body.business
+    let business = await database.eventgo_schema().EventGoBusiness(business_profile)
+    let exists = await business.Exists();
+    if(exists == false){res.send("Business account already doesn't exists to update"); return false;}
 
+    let synced = await business.Synchronize();
+    let updated = await business.Update();
+
+    if(updated){
+        let resp = ServerResponse('Profile successfully updated');
+        resp.set_succes("");
+        res.json(resp);
+        console.log("updated:", updated, " synced:", synced)
+        return true;
+    }
+
+    let resp = ServerResponse("Profile couldn't be  updated");
+    resp.set_not_sucess("");
+    res.json(resp);
+    console.log("updated:", updated, " synced:", synced)
+    return false;
+}
+
+ //TESTING NEEDED
+expressServer.router('app').post('/Profile/Stripe/Update', StripeUpdate)
+async function StripeUpdate(req, res){
+    //contains the user id as well
+    let stripe_profile = req.body.stripe
+
+    let stripe = await database.eventgo_schema().StripeAccount(business_profile)
+    let exists = await stripe.Exists();
+    if(exists == false){res.send("Account profile already doesn't exists"); return false;}
+   
+    let synced = await stripe.Synchronize();
+    stripe.SetAttributes(stripe_profile)
+    let updated = await stripe.Update();
+    
+    if(updated){
+        let resp = ServerResponse('Profile successfully updated');
+        resp.set_succes("");
+        res.json(resp);
+        console.log("updated:", updated, " synced:", synced)
+        return true;
+    }
+
+    let resp = ServerResponse("Profile couldn't be updated");
+    resp.set_not_sucess("");
+    res.json(resp);
+    console.log("updated:", updated, " synced:", synced)
+    return false;
 }
 
 
-expressServer.router('app').post('/createBusinessProfile', CreateBusinessProfile)
-async function CreateBusinessProfile(req, res){
+/**QR CODE ROUTES */
 
+expressServer.router('app').post('/validateQRcodeToken', ValidateQRcode)
+async function ValidateQRcode(req, res){
+    /**
+     * Function assumes that transactions in the table can only exist if stripe transaction was successfull
+     */
+    let qr_token = req.body.qr_token
+    var object = JSON.parse(qr_token)
+
+    let ticket = new Ticket(object)
+    let exists = ticket.Exists();
+    let synced = await ticket.Synchronize();
+    let ticket_data = ticket.Attributes();
+    if(exists == false){res.send("requested validation failed"); return false;}
+
+    let transaction = new Transaction({TransactionID:object.TransactionID, ID:object.ID})
+    let tran_exists = await transaction.Exists();
+    let tran_synced = await transaction.Synchronize();
+    let tran_attr = transaction.Attributes();
+
+    if(tran_attr.TicketID == ticket_data.TicketID && ticket_data.TransactionID == tran_attr.TransactionID){
+        res.send("validation success!");
+        return true;
+    }
+
+    res.send("requested validation failed!");
+    return false;
 }
 
-expressServer.router('app').post('/createStripeProfile', CreateStripeProfile)
-async function CreateStripeProfile(req, res){
 
+
+expressServer.router('app').post('/GetTicketQRcode', GetTicketQRcode)
+async function GetTicketQRcode(req, res){
+    /**
+     * Requires ticket ID to fetch the associated QR code
+     * NOTE: This function assumed that QR code will be stored in a separate table
+     */
+    let ticket_body = req.body
+    let ticket = await database.eventgo_schema().Ticket(ticket_body)
+    let exists = await ticket.Exists();
+    if(exists == false){res.send("Ticket doesn't exist with the ID"); return false}
+
+    let {error, data} = await database.supabase_client().from("TicketQRCodes").select().eq('ID', ticket_body.ID)
+    if(data != null && data != undefined && data.length > 0){
+        res.send(data.EncryptedToken);
+        return true;
+    }
+
+    res.send("Error fetching associated QR code for given ticket ID "+String(ticket_body.ID))
+    return true;
 }
 
+/***EXTRA ROUTES***/
 
+//TESTING NEEDED
+expressServer.router('app').post('/User/PurchasedTickets', UserPurchasedTickets)
+async function UserPurchasedTickets(req, res){
+    //returns all the tickets associated with user
+    let user_profile = req.body.eventgo_user    
+    let ev_user = await database.eventgo_schema().EventGoUser(user_profile)
 
+    let exists = await ev_user.Exists();
+    if(exists == false){
+        let resp = new ServerResponse("User doesnt exists")
+        resp.set_not_sucess(""); return false;
+    }
 
+    let ev_user_attr = ev_user.Attributes();
+    let {error, data} = await database.supabase_client().from('ProcessedTickets').select().eq('ID', ev_user_attr.ID)
+    if(data != null && data != undefined && data.length > 0){
+        res.json(data);
+        return true;
+    }
 
-/**QR CODE ROUTES**/
+    let resp = new ServerResponse("User doesn't have any processed purchased tickets yet")
+    resp.set_not_sucess("");
+    return false;
+}
+
+//TESTING NEEDED
+expressServer.router('app').post('/Business/ActiveTickets', BusinessActiveTickets)
+async function BusinessActiveTickets(req, res){
+    let business_body = req.body.business
+
+    let business = await database.eventgo_schema('EventGoBusiness').EventGoBusiness(business_body)
+
+    let exists = await business.Exists();
+    if(exists == false){
+        let resp = new ServerResponse("Business doesnt exists")
+        resp.set_not_sucess(""); return false;
+    }
+
+    let business_id = business.Attributes().ID
+    let {error, data} = await database.supabase_client().from('Tickets').select().eq('ID', business_id)
+    if(data != null && data != undefined && data.length > 0){
+        res.json(data);
+        return true;
+    }
+
+    let resp = new ServerResponse("Business doesn't have any active tickets yet")
+    resp.set_not_sucess("");
+    return false;
+}

@@ -13,6 +13,9 @@ export const TICKET_NOT_CREATED = 'ticket not created'
 export const TICKET_DELETED = 'ticket deleted'
 export const TICKET_NOT_DELETED = 'ticket not deleted'
 
+
+
+
 export class Ticket extends BaseEntity{
     //looks good
     constructor(attributes=null){
@@ -31,7 +34,9 @@ export class Ticket extends BaseEntity{
                 CustomerID:null,
                 CustomerStripeAccID:null,
                 ShowName:null,
-                TicketID:null
+                QRToken:null,
+                TransactionID:null
+                //TicketID:null
             }
         }
         console.log(this.attributes, " CLass Ticket:")
@@ -49,6 +54,36 @@ export class Ticket extends BaseEntity{
         attributes.PaymentType = "Credit"
         let transaction = new Transaction(attributes)
         return transaction
+    }
+
+
+    async GenerateTransaction(){
+        let synced = this.Synchronize();
+        if(!synced){return false}
+
+        let transaction = new Transaction()
+        let attributes = transaction.Attributes();
+        attributes.ID = this.attributes.ID
+        attributes.PaymentBy = this.attributes.CustomerID
+        attributes.PaymentTo = this.attributes.BusinessOwnerID
+        attributes.Amount = this.attributes.Price
+        attributes.TicketID = this.attributes.TicketID
+        attributes.Currency = "US Dollars"
+        attributes.PaymentType = "Credit"
+
+        let created = await transaction.Create();
+        let tran_synced = await transaction.Synchronize();
+        attributes = transaction.Attributes();
+
+        if(created){
+            this.attributes.TransactionID = attributes.TransactionID
+            let updated = await this.Update();
+            console.log(attributes.Amount, this.Price, "Ticket.Transaction()");
+            return transaction;
+        }
+        else{
+            return false;
+        }
     }
 
     async Create(){
@@ -121,6 +156,7 @@ export class Ticket extends BaseEntity{
     isAvailable(){
         return (this.attributes.Onsale == true)
     }
+
     async Search(){
         let {data, error} = await supabaseAdminClient.from('Tickets').select().match(this.attributes)
         console.log(data, error, " Ticket Search() tracer")
@@ -150,7 +186,9 @@ export class ProcessedTicket extends BaseEntity{
                 BusinessOwnerID:null,
                 CustomerID:null,
                 ShowName:null,
-                TicketID:null
+                QRToken:null,
+                TransactionID:null
+                //TicketID:null,
             }
         }
         console.log(this.attributes, " CLass ProcessedTicket:")
@@ -168,6 +206,35 @@ export class ProcessedTicket extends BaseEntity{
         attributes.PaymentType = "Credit"
         let transaction = new Transaction(attributes)
         return transaction
+    }
+
+    async GenerateTransaction(){
+        let synced = await this.Synchronize();
+        if(!synced){return false}
+
+        let transaction = new Transaction()
+        let attributes = transaction.Attributes();
+        attributes.ID = this.attributes.ID
+        attributes.PaymentBy = this.attributes.CustomerID
+        attributes.PaymentTo = this.attributes.BusinessOwnerID
+        attributes.Amount = this.attributes.Price
+        attributes.TicketID = this.attributes.TicketID
+        attributes.Currency = "US Dollars"
+        attributes.PaymentType = "Credit"
+
+        let created = await transaction.Create();
+        let tran_synced = await transaction.Synchronize();
+        attributes = transaction.Attributes();
+
+        if(created){
+            this.attributes.TransactionID = attributes.TransactionID
+            let updated = await this.Update();
+            console.log(attributes.Amount, this.Price, "Ticket.Transaction()")
+            return transaction;
+        }
+        else{
+            return false;
+        }
     }
 
     async Create(){
