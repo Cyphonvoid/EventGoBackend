@@ -12,6 +12,7 @@ export class DatabaseSchema{
     SupaUser(attributes){return new SupabaseUser(attributes);}
     EventGoUser(attributes){return new EventGoUser(attributes);}
     User(attributes){return new CombinedUser(attributes);}
+    EventGoBusiness(attributes){return new EventGoBusiness(attributes);}
     Business(attributes){return new EventGoBusiness(attributes);}
     Transaction(attributes){return new Transaction(attributes)}
     Show(attributes){return new Show(attributes)}

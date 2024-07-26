@@ -118,8 +118,6 @@ really understand how does stripe transactions work then implement QR code.
  * 
  * also there's no point in creating a separate table for QRcodes. 
  */
-
- 
     //This function needs to verify if the payment actually occured using the extracted details from 
     //the token or ticketID and or something. For this understand how stripe processes transactions 
     //If transactions are correct then validate the code.

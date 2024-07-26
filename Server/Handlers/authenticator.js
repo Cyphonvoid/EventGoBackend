@@ -14,7 +14,6 @@ export async function Confirmation(req, res){
     res.send("Confirmation endpoint reached")
 }
 
-
 expressServer.router('app').get('/verifyQRcode', VerifyQRcode)
 async function VerifyQRcode(req, res){
     

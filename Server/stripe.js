@@ -7,6 +7,6 @@ const stripe = new Stripe(stripe_sec_key)
 
 const account = await stripe.accounts.create({
    
-  });
+});
 
 console.log(account)
